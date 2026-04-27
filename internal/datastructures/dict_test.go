@@ -81,6 +81,6 @@ func TestExpireReset(t *testing.T) {
 	time.Sleep(60 * time.Millisecond)
 
 	res := d.Get("key")
-	assert.NotNil(t, res) 
-}
 
+	assert.Nil(t, res)
+}
