@@ -37,6 +37,24 @@ func ExecuteAndResponse(cmd *Command, connFd int) error {
 		res = cmdDEL(cmd.Args)
 	case "EXISTS":
 		res = cmdEXISTS(cmd.Args)
+	case "ZADD":
+		res = cmdZADD(cmd.Args)
+	case "ZSCORE":
+		res = cmdZSCORE(cmd.Args)
+	case "ZRANK":
+		res = cmdZRANK(cmd.Args)
+	case "ZRANGE":
+		res = cmdZRANGE(cmd.Args)
+	case "ZREM":
+		res = cmdZREM(cmd.Args)
+	case "SADD":
+		res = cmdSADD(cmd.Args)
+	case "SREM":
+		res = cmdSREM(cmd.Args)
+	case "SMEMBERS":
+		res = cmdSMEMBERS(cmd.Args)
+	case "SISMEMBER":
+		res = cmdSISMEMBER(cmd.Args)
 	default:
 		res = []byte("-CMD NOT FOUND\r\n")
 	}
