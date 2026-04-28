@@ -2,11 +2,7 @@ package core
 
 import (
 	"errors"
-	"strconv"
 	"syscall"
-	"time"
-
-	"github.com/ngthdong/threadis/internal/constant"
 )
 
 func cmdPING(args []string) []byte {
@@ -21,118 +17,6 @@ func cmdPING(args []string) []byte {
 		res = Encode(args[0], false)
 	}
 	return res
-}
-
-func cmdSET(args []string) []byte {
-	if len(args) < 2 || len(args) == 3 || len(args) > 4 {
-		return Encode(errors.New("(error) ERR wrong number of arguments for 'SET' command"), false)
-	}
-
-	var key, value string
-	var ttlMs int64 = -1
-
-	key, value = args[0], args[1]
-	if len(args) == 4 {
-		ttlSec, err := strconv.ParseInt(args[3], 10, 64)
-		if err != nil {
-			return Encode(errors.New("(error) ERR value is not an integer or out of range"), false)
-		}
-		ttlMs = ttlSec * 1000
-	}
-
-	dictStore.Set(key, dictStore.NewObj(key, value, ttlMs))
-	return constant.RespOk
-}
-
-func cmdGET(args []string) []byte {
-	if len(args) != 1 {
-		return Encode(errors.New("(error) ERR wrong number of arguments for 'GET' command"), false)
-	}
-
-	key := args[0]
-	obj := dictStore.Get(key)
-	if obj == nil {
-		return constant.RespNil
-	}
-
-	if dictStore.HasExpired(key) {
-		return constant.RespNil
-	}
-
-	return Encode(obj.Value, false)
-}
-
-func cmdTTL(args []string) []byte {
-	if len(args) != 1 {
-		return Encode(errors.New("(error) ERR wrong number of arguments for 'TTL' command"), false)
-	}
-	key := args[0]
-	obj := dictStore.Get(key)
-	if obj == nil {
-		return constant.TtlKeyNotExist
-	}
-
-	exp, isExpirySet := dictStore.GetExpiry(key)
-	if !isExpirySet {
-		return constant.TtlKeyExistNoExpire
-	}
-
-	now := uint64(time.Now().UnixMilli())
-
-	if exp <= now {
-		return constant.TtlKeyNotExist
-	}
-
-	remainMs := exp - now
-
-	return Encode(int64(remainMs/1000), false)
-}
-
-func cmdEXPIRE(args []string) []byte {
-	if len(args) != 2 {
-		return Encode(errors.New("(error) ERR wrong number of arguments for 'EXPIRE' command"), false)
-	}
-
-	key := args[0]
-	ttlSec, err := strconv.ParseInt(args[1], 10, 64)
-	if err != nil {
-		return Encode(errors.New("(error) ERR value is not an integer or out of range"), false)
-	}
-
-	if dictStore.Get(key) == nil {
-		return Encode(int64(0), false)
-	}
-
-	dictStore.SetExpiry(key, ttlSec*1000)
-	return Encode(int64(1), false)
-}
-
-func cmdDEL(args []string) []byte {
-	if len(args) < 1 {
-		return Encode(errors.New("(error) ERR wrong number of arguments for 'DEL' command"), false)
-	}
-
-	var deleted int64 = 0
-	for _, k := range args {
-		if dictStore.Del(k) {
-			deleted++
-		}
-	}
-	return Encode(deleted, false)
-}
-
-func cmdEXISTS(args []string) []byte {
-	if len(args) < 1 {
-		return Encode(errors.New("(error) ERR wrong number of arguments for 'EXISTS' command"), false)
-	}
-
-	var count int64 = 0
-	for _, k := range args {
-		if dictStore.Get(k) != nil {
-			count++
-		}
-	}
-	return Encode(count, false)
 }
 
 func ExecuteAndResponse(cmd *Command, connFd int) error {
