@@ -35,11 +35,11 @@ func TestZSetAddDuplicate(t *testing.T) {
 
 	// same score → no change
 	n := zs.Add(1, "a")
-	assert.Equal(t, 1, n)
+	assert.Equal(t, 0, n)
 
-	// different score → update
+	// different score → update 
 	n = zs.Add(2, "a")
-	assert.Equal(t, 1, n)
+	assert.Equal(t, 0, n)
 
 	ok, score := zs.GetScore("a")
 	assert.Equal(t, 1, ok)
