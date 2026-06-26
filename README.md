@@ -29,9 +29,8 @@ Built from scratch without relying on external database implementations:
 
 ## Getting Started
 ```
+  # run server 
   go run cmd/main.go
-  # on another terminal
-  redis-cli -p 8081
 ```
 ## Supported Commands
 
@@ -48,6 +47,8 @@ The server supports a wide range of commands grouped by data type:
 
 ## Test with Redis CLI
 ```bash
+redis-cli -p 3000
+
 SET session abc123
 EXPIRE session 10
 TTL session
